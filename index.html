@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاكي الرئيس التنفيذي - رحلة النمو</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Tajawal', 'Cairo', 'Amiri', 'Noto Sans Arabic', sans-serif; 
+            direction: rtl;
+        }
+        .ltr { direction: ltr; }
+        
+        /* تحسين الأزرار والتفاعلات */
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .hover-scale {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        
+        .animate-wiggle {
+            animation: wiggle 2s ease-in-out infinite;
+        }
+        
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
+        }
+        
+        .animate-pulse-custom {
+            animation: pulse-custom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse-custom {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* تحسين البطاقات */
+        .card-gradient {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* تحسين الإدخالات */
+        .input-enhanced {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .input-enhanced:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
+        
+        /* تأثيرات الإشعارات */
+        .notification-enter {
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* تحسين الألوان والتدرجات */
+        .bg-success { background: linear-gradient(135deg, #10b981, #059669); }
+        .bg-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .bg-danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .bg-info { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        
+        /* تحسين النصوص */
+        .text-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* تأثيرات المستويات */
+        .level-badge {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+            to { box-shadow: 0 0 30px rgba(139, 92, 246, 0.8); }
+        }
+
+        .level-up-animation {
+            animation: levelUp 1s ease-out;
+        }
+
+        @keyframes levelUp {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.2) rotate(5deg); opacity: 0.8; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .market-expansion {
+            animation: expand 0.8s ease-out;
+        }
+
+        @keyframes expand {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Game Constants
+        const GAME_CONFIG = {
+            STARTUP_COSTS: 20000,
+            WORKSHOP_RENT: 5000,
+            WORKER_MONTHLY_SALARY: 1000,
+            INITIAL_WORKERS: 5,
+            LOAN_INTEREST_RATE: 0.15,
+            LOAN_PENALTY_RATE: 0.05,
+            LOAN_DURATION_MONTHS: 24,
+            MAX_LOANS: 5,
+            LABOR_VIOLATION_FINE: 8000,
+            RECRUITMENT_COST: 500,
+            PRODUCTION_PER_WORKER: 20,
+            RAW_UNIT_COST: 25,
+            VARIABLE_COST_PER_UNIT: 15,
+            FIXED_WEEKLY_COST: 1000,
+            BASE_DEMAND: 80,
+            REFERENCE_PRICE: 85,
+            PRICE_ELASTICITY: 1.2,
+            MARKETING_COST_PER_CUSTOMER: 8,
+            BLACK_MARKET_PREMIUM_MIN: 0.25,
+            BLACK_MARKET_PREMIUM_MAX: 0.45,
+            BLACK_MARKET_SUCCESS: 0.55,
+            BLACK_MARKET_FINE: 0.25,
+            BLACK_MARKET_DEFAULT: 0.20,
+            FINE_AMOUNT: 3000,
+            COMPLIANCE_DROP_BLACK_MARKET: 5,
+            COMPLIANCE_DROP_FINE: 15,
+            CSAT_DROP_STOCKOUT: 10,
+            CSAT_DROP_OVERPRICING: 8,
+            CSAT_RECOVERY: 2,
+            GROWTH_MULTIPLE: 12,
+            CUSTOMER_COMPENSATION_COST: 5000,
+            CUSTOMER_COMPENSATION_BOOST: 15,
+            QUALITY_IMPROVEMENT_COST: 8000,
+            QUALITY_IMPROVEMENT_WEEKS: 4,
+            QUALITY_IMPROVEMENT_WEEKLY_BOOST: 5,
+            NATURAL_RECOVERY_RATE: 2
+        };
+
+        // نظام المستويات الجديد
+        const LEVELS = {
+            1: {
+                name: "الشركة الناشئة",
+                icon: "🌱",
+                description: "ابدأ رحلتك كرئيس تنفيذي",
+                marketMultiplier: 1,
+                maxWorkers: 20,
+                features: ["القروض الأساسية", "السوق المحلي", "الإنتاج البسيط"],
+                unlocks: [],
+                challenges: ["تعلم الأساسيات", "إدارة النقد", "بناء العمليات"],
+                bgColor: "from-green-50 to-blue-100",
+                cardColor: "border-green-300 bg-green-50"
+            },
+            2: {
+                name: "التوسع المحلي",
+                icon: "🏪",
+                description: "توسع في السوق المحلي وطور عملياتك",
+                marketMultiplier: 1.5,
+                maxWorkers: 50,
+                features: ["متاجر التجزئة", "حملات التسويق المتقدمة", "تحسين الجودة"],
+                unlocks: ["متاجر التجزئة", "التسويق الرقمي", "برامج الولاء"],
+                challenges: ["المنافسة المحلية", "إدارة المخزون", "رضا العملاء"],
+                bgColor: "from-blue-50 to-purple-100",
+                cardColor: "border-blue-300 bg-blue-50"
+            },
+            3: {
+                name: "التوسع الإقليمي",
+                icon: "🌍",
+                description: "اكتشف أسواق جديدة وطور منتجات متنوعة",
+                marketMultiplier: 2.5,
+                maxWorkers: 100,
+                features: ["أسواق متعددة", "خطوط إنتاج متنوعة", "شراكات استراتيجية"],
+                unlocks: ["التصدير", "منتجات متميزة", "مراكز التوزيع"],
+                challenges: ["التنوع الجغرافي", "إدارة سلسلة التوريد", "التنظيم المعقد"],
+                bgColor: "from-purple-50 to-pink-100",
+                cardColor: "border-purple-300 bg-purple-50"
+            },
+            4: {
+                name: "الشركة الكبرى",
+                icon: "🏢",
+                description: "أصبح لاعباً رئيسياً في السوق",
+                marketMultiplier: 4,
+                maxWorkers: 200,
+                features: ["الاستحواذات", "البحث والتطوير", "الأسواق الدولية"],
+                unlocks: ["شراء المنافسين", "مختبر الابتكار", "العلامة التجارية العالمية"],
+                challenges: ["المنافسة الشرسة", "الابتكار المستمر", "إدارة الأزمات"],
+                bgColor: "from-pink-50 to-red-100",
+                cardColor: "border-pink-300 bg-pink-50"
+            },
+            5: {
+                name: "الإمبراطورية التجارية",
+                icon: "👑",
+                description: "هيمن على السوق وابني إمبراطوريتك",
+                marketMultiplier: 6,
+                maxWorkers: 500,
+                features: ["الهيمنة على السوق", "الاستثمار في الشركات الناشئة", "التأثير السياسي"],
+                unlocks: ["صندوق الاستثمار", "اللوبي السياسي", "الإمبراطورية العالمية"],
+                challenges: ["مكافحة الاحتكار", "المسؤولية الاجتماعية", "الاستدامة"],
+                bgColor: "from-yellow-50 to-orange-100",
+                cardColor: "border-yellow-300 bg-yellow-50"
+            }
+        };
+
+        // الميزات الجديدة حسب المستوى
+        const LEVEL_FEATURES = {
+            2: {
+                retailStores: {
+                    name: "متاجر التجزئة",
+                    cost: 50000,
+                    monthlyRevenue: 8000,
+                    description: "افتح متاجر لزيادة المبيعات"
+                },
+                digitalMarketing: {
+                    name: "التسويق الرقمي",
+                    cost: 15000,
+                    efficiency: 1.5,
+                    description: "حملات تسويق أكثر فعالية"
+                }
+            },
+            3: {
+                export: {
+                    name: "التصدير",
+                    cost: 100000,
+                    marketBonus: 0.8,
+                    description: "صدر منتجاتك للأسواق الخارجية"
+                },
+                premiumProducts: {
+                    name: "منتجات متميزة",
+                    cost: 75000,
+                    priceBonus: 0.4,
+                    description: "طور منتجات عالية الجودة"
+                }
+            },
+            4: {
+                acquisitions: {
+                    name: "الاستحواذات",
+                    cost: 500000,
+                    capacityBonus: 1.5,
+                    description: "اشتر الشركات المنافسة"
+                },
+                rnd: {
+                    name: "البحث والتطوير",
+                    cost: 200000,
+                    innovationBonus: 0.3,
+                    description: "استثمر في الابتكار"
+                }
+            },
+            5: {
+                monopoly: {
+                    name: "الهيمنة على السوق",
+                    cost: 1000000,
+                    marketControl: 0.6,
+                    description: "سيطر على السوق بالكامل"
+                },
+                venture: {
+                    name: "صندوق الاستثمار",
+                    cost: 750000,
+                    passiveIncome: 50000,
+                    description: "استثمر في الشركات الناشئة"
+                }
+            }
+        };
+
+        const DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+        const DAY_ACTIVITIES = {
+            0: 'المشتريات',
+            1: 'تخطيط الإنتاج',
+            2: 'تنفيذ الإنتاج',
+            3: 'التسعير والتسويق',
+            4: 'المبيعات'
+        };
+
+        // أحداث عشوائية متدرجة حسب المستوى
+        const RANDOM_EVENTS = {
+            1: [
+                { name: 'ارتفاع أسعار المواد الخام', effect: { rawUnitCost: 1.2 }, description: 'ارتفعت تكاليف الموردين بنسبة 20%' },
+                { name: 'زيادة الطلب المحلي', effect: { baseDemand: 1.3 }, description: 'ازداد الطلب في السوق المحلي بنسبة 30%' },
+                { name: 'عطل بسيط في المعدات', effect: { capacity: 0.8 }, description: 'انخفضت القدرة الإنتاجية بنسبة 20%' }
+            ],
+            2: [
+                { name: 'منافس جديد في السوق', effect: { baseDemand: 0.7 }, description: 'منافس جديد قلل الطلب بنسبة 30%' },
+                { name: 'حملة إعلانية ناجحة', effect: { baseDemand: 1.5, csat: 10 }, description: 'حملة إعلانية زادت الطلب والرضا' },
+                { name: 'مشاكل في سلسلة التوريد', effect: { rawUnitCost: 1.4, variableCost: 1.2 }, description: 'اضطرابات في التوريد زادت التكاليف' }
+            ],
+            3: [
+                { name: 'أزمة اقتصادية إقليمية', effect: { baseDemand: 0.6, cash: -50000 }, description: 'أزمة اقتصادية أثرت على الطلب والسيولة' },
+                { name: 'فرصة تصدير كبيرة', effect: { baseDemand: 2.0, cash: 75000 }, description: 'عقد تصدير كبير زاد الطلب والإيرادات' },
+                { name: 'تغييرات تنظيمية', effect: { compliance: -30, cash: -25000 }, description: 'قوانين جديدة تتطلب تكاليف امتثال' }
+            ],
+            4: [
+                { name: 'حرب أسعار مع المنافسين', effect: { baseDemand: 0.5, variableCost: 1.3 }, description: 'حرب أسعار شرسة قللت الهوامش' },
+                { name: 'اختراق تكنولوجي', effect: { capacity: 1.8, variableCost: 0.7 }, description: 'تقنية جديدة حسنت الكفاءة' },
+                { name: 'فضيحة في الصناعة', effect: { csat: -25, compliance: -20 }, description: 'فضيحة صناعية أضرت بالثقة' }
+            ],
+            5: [
+                { name: 'تحقيق مكافحة الاحتكار', effect: { cash: -200000, compliance: -40 }, description: 'تحقيق حكومي في ممارسات الاحتكار' },
+                { name: 'ثورة تكنولوجية', effect: { capacity: 2.5, baseDemand: 1.8 }, description: 'ثورة تقنية غيرت قواعد اللعبة' },
+                { name: 'أزمة عالمية', effect: { baseDemand: 0.4, cash: -300000 }, description: 'أزمة عالمية أثرت على جميع الأسواق' }
+            ]
+        };
+
+        function CEOSimulation() {
+            const [gameStarted, setGameStarted] = useState(false);
+            const [setupComplete, setSetupComplete] = useState(false);
+            const [companyName, setCompanyName] = useState('');
+            const [hasSavedGame, setHasSavedGame] = useState(false);
+            const [showLevelUp, setShowLevelUp] = useState(false);
+            const [setupConfig, setSetupConfig] = useState({
+                loanAmount: 80000,
+                initialWorkers: 5
+            });
+            const [gameState, setGameState] = useState({
+                month: 1,
+                week: 1,
+                day: 0,
+                level: 1,
+                cash: 0,
+                loans: [],
+                rawInventory: 0,
+                finishedInventory: 0,
+                compliance: 100,
+                customerSatisfaction: 100,
+                monthlyProfit: 0,
+                loansUsed: 0,
+                workers: 0,
+                capacity: 0,
+                rawUnitCost: GAME_CONFIG.RAW_UNIT_COST,
+                variableCost: GAME_CONFIG.VARIABLE_COST_PER_UNIT,
+                baseDemand: GAME_CONFIG.BASE_DEMAND,
+                procurementAmount: 0,
+                plannedProduction: 0,
+                unitPrice: GAME_CONFIG.REFERENCE_PRICE,
+                marketingSpend: 0,
+                salesChannel: 'legal',
+                weekResults: [],
+                currentEvent: null,
+                salariesPaid: true,
+                rentPaid: true,
+                workersToHire: 0,
+                gameEnded: false,
+                endReason: '',
+                qualityImprovement: null,
+                unpaidSalaryMonths: 0,
+                lastLaborViolation: null,
+                // ميزات المستويات الجديدة
+                levelFeatures: {
+                    retailStores: 0,
+                    digitalMarketing: false,
+                    export: false,
+                    premiumProducts: false,
+                    acquisitions: 0,
+                    rnd: false,
+                    monopoly: false,
+                    venture: false
+                },
+                totalRevenue: 0,
+                marketShare: 0.1
+            });
+
+            const [inputs, setInputs] = useState({
+                procurement: 0,
+                production: 0,
+                price: GAME_CONFIG.REFERENCE_PRICE,
+                marketing: 0,
+                hireWorkers: 0
+            });
+
+            const getCurrentLevel = () => LEVELS[gameState.level] || LEVELS[1];
+            const getMarketMultiplier = () => getCurrentLevel().marketMultiplier;
+            const getMaxWorkers = () => getCurrentLevel().maxWorkers;
+
+            const calculateTotalDebt = () => {
+                return gameState.loans.reduce((total, loan) => total + loan.totalDebt, 0);
+            };
+
+            const calculateMonthlyPayments = () => {
+                return gameState.loans.reduce((total, loan) => total + loan.monthlyPayment, 0);
+            };
+
+            const calculateLoanDuration = (amount) => {
+                if (amount <= 100000) return 24;
+                if (amount <= 200000) return 36;
+                if (amount <= 300000) return 48;
+                if (amount <= 500000) return 60;
+                return 24;
+            };
+
+            const calculateEV = () => {
+                // 1. حساب الإيرادات الشهرية المتوسطة (آخر 3 أشهر أو المتاح)
+                const monthsToConsider = Math.min(3, gameState.month);
+                const avgMonthlyRevenue = monthsToConsider > 0 ? gameState.totalRevenue / gameState.month : 0;
+                
+                // 2. حساب التكاليف الشهرية الثابتة
+                const monthlyCosts = (gameState.workers * GAME_CONFIG.WORKER_MONTHLY_SALARY) + 
+                                   GAME_CONFIG.WORKSHOP_RENT + 
+                                   calculateMonthlyPayments();
+                
+                // 3. حساب الربح الشهري المقدر
+                const estimatedMonthlyProfit = Math.max(0, avgMonthlyRevenue - monthlyCosts);
+                
+                // 4. مضاعف التقييم حسب المستوى والأداء
+                let valuationMultiple = 8; // مضاعف أساسي
+                
+                // تعديل المضاعف حسب المستوى
+                valuationMultiple += (gameState.level - 1) * 2; // +2 لكل مستوى
+                
+                // تعديل المضاعف حسب رضا العملاء
+                const csatFactor = gameState.customerSatisfaction / 100;
+                valuationMultiple *= (0.5 + csatFactor * 0.5); // من 0.5x إلى 1x
+                
+                // تعديل المضاعف حسب الامتثال (السمعة)
+                const complianceFactor = gameState.compliance / 100;
+                valuationMultiple *= (0.7 + complianceFactor * 0.3); // من 0.7x إلى 1x
+                
+                // تعديل المضاعف حسب حصة السوق
+                const marketShareBonus = gameState.marketShare * 2; // حتى +20% للهيمنة الكاملة
+                valuationMultiple *= (1 + marketShareBonus);
+                
+                // 5. قيمة الأصول التشغيلية
+                const operationalAssets = gameState.workers * 5000 + // قيمة القوى العاملة المدربة
+                                        gameState.rawInventory * gameState.rawUnitCost + // قيمة المخزون
+                                        gameState.finishedInventory * gameState.unitPrice * 0.8; // قيمة البضائع الجاهزة
+                
+                // 6. قيمة الميزات والاستثمارات
+                let featuresValue = 0;
+                if (gameState.levelFeatures.retailStores > 0) {
+                    featuresValue += gameState.levelFeatures.retailStores * 40000; // قيمة كل متجر
+                }
+                if (gameState.levelFeatures.digitalMarketing) {
+                    featuresValue += 25000; // قيمة النظام الرقمي
+                }
+                if (gameState.levelFeatures.export) {
+                    featuresValue += 80000; // قيمة شبكة التصدير
+                }
+                if (gameState.levelFeatures.premiumProducts) {
+                    featuresValue += 60000; // قيمة خط الإنتاج المتميز
+                }
+                if (gameState.levelFeatures.acquisitions > 0) {
+                    featuresValue += gameState.levelFeatures.acquisitions * 300000; // قيمة الشركات المستحوذة
+                }
+                if (gameState.levelFeatures.rnd) {
+                    featuresValue += 150000; // قيمة قسم البحث والتطوير
+                }
+                if (gameState.levelFeatures.venture) {
+                    featuresValue += 600000; // قيمة صندوق الاستثمار
+                }
+                if (gameState.levelFeatures.monopoly) {
+                    featuresValue += 1000000; // قيمة الهيمنة على السوق
+                }
+                
+                // 7. حساب القيمة الإجمالية
+                const operatingValue = estimatedMonthlyProfit * valuationMultiple;
+                const totalAssetValue = operationalAssets + featuresValue;
+                const netCash = Math.max(0, gameState.cash - calculateTotalDebt());
+                
+                // 8. القيمة النهائية مع تطبيق عوامل المخاطر
+                let finalValue = operatingValue + totalAssetValue + netCash;
+                
+                // تقليل القيمة في حالة الديون العالية
+                const debtRatio = calculateTotalDebt() / Math.max(1, gameState.cash + avgMonthlyRevenue);
+                if (debtRatio > 2) {
+                    finalValue *= 0.7; // تقليل 30% للمخاطر العالية
+                } else if (debtRatio > 1) {
+                    finalValue *= 0.85; // تقليل 15% للمخاطر المتوسطة
+                }
+                
+                // تقليل القيمة في حالة انخفاض الأداء
+                if (gameState.customerSatisfaction < 50 || gameState.compliance < 50) {
+                    finalValue *= 0.6; // تقليل 40% للأداء الضعيف
+                }
+                
+                return Math.max(0, Math.round(finalValue));
+            };
+
+            const checkLevelUp = () => {
+                const currentLevel = gameState.level;
+                let shouldLevelUp = false;
+                
+                // شروط الانتقال للمستوى التالي
+                if (currentLevel === 1 && gameState.month >= 12 && gameState.cash > 100000) {
+                    shouldLevelUp = true;
+                } else if (currentLevel === 2 && gameState.month >= 24 && gameState.totalRevenue > 500000) {
+                    shouldLevelUp = true;
+                } else if (currentLevel === 3 && gameState.month >= 36 && gameState.workers >= 50) {
+                    shouldLevelUp = true;
+                } else if (currentLevel === 4 && gameState.month >= 48 && calculateEV() > 2000000) {
+                    shouldLevelUp = true;
+                }
+                
+                if (shouldLevelUp && currentLevel < 5) {
+                    setGameState(prev => ({
+                        ...prev,
+                        level: prev.level + 1,
+                        baseDemand: Math.round(prev.baseDemand * 1.5), // زيادة السوق
+                        marketShare: Math.min(0.8, prev.marketShare + 0.1)
+                    }));
+                    setShowLevelUp(true);
+                    setTimeout(() => setShowLevelUp(false), 3000);
+                }
+            };
+
+            const buyLevelFeature = (featureName) => {
+                const levelFeatures = LEVEL_FEATURES[gameState.level];
+                if (!levelFeatures || !levelFeatures[featureName]) return;
+                
+                const feature = levelFeatures[featureName];
+                if (gameState.cash < feature.cost) return;
+                
+                setGameState(prev => {
+                    const newState = { ...prev };
+                    newState.cash -= feature.cost;
+                    
+                    if (featureName === 'retailStores') {
+                        newState.levelFeatures.retailStores += 1;
+                    } else {
+                        newState.levelFeatures[featureName] = true;
+                    }
+                    
+                    return newState;
+                });
+            };
+
+            const payLoanInstallment = (loanIndex) => {
+                setGameState(prev => {
+                    const loan = prev.loans[loanIndex];
+                    if (!loan || prev.cash < loan.monthlyPayment || loan.paidThisMonth) {
+                        return prev;
+                    }
+
+                    const newLoans = [...prev.loans];
+                    const updatedLoan = {
+                        ...loan,
+                        totalDebt: Math.max(0, loan.totalDebt - loan.monthlyPayment),
+                        remainingMonths: Math.max(0, loan.remainingMonths - 1),
+                        paidThisMonth: true,
+                        missedPayments: 0
+                    };
+                    
+                    if (updatedLoan.remainingMonths <= 0 || updatedLoan.totalDebt <= 0) {
+                        newLoans.splice(loanIndex, 1);
+                    } else {
+                        newLoans[loanIndex] = updatedLoan;
+                    }
+                    
+                    return {
+                        ...prev,
+                        cash: prev.cash - loan.monthlyPayment,
+                        loans: newLoans
+                    };
+                });
+            };
+
+            const paySalaries = () => {
+                const totalSalaries = gameState.workers * GAME_CONFIG.WORKER_MONTHLY_SALARY;
+                if (gameState.cash >= totalSalaries) {
+                    setGameState(prev => ({
+                        ...prev,
+                        cash: prev.cash - totalSalaries,
+                        salariesPaid: true
+                    }));
+                }
+            };
+
+            const payRent = () => {
+                if (gameState.cash >= GAME_CONFIG.WORKSHOP_RENT) {
+                    setGameState(prev => ({
+                        ...prev,
+                        cash: prev.cash - GAME_CONFIG.WORKSHOP_RENT,
+                        rentPaid: true
+                    }));
+                }
+            };
+
+            const compensateCustomers = () => {
+                if (gameState.cash >= GAME_CONFIG.CUSTOMER_COMPENSATION_COST) {
+                    setGameState(prev => ({
+                        ...prev,
+                        cash: prev.cash - GAME_CONFIG.CUSTOMER_COMPENSATION_COST,
+                        customerSatisfaction: Math.min(100, prev.customerSatisfaction + GAME_CONFIG.CUSTOMER_COMPENSATION_BOOST)
+                    }));
+                }
+            };
+
+            const investInQuality = () => {
+                if (gameState.cash >= GAME_CONFIG.QUALITY_IMPROVEMENT_COST && !gameState.qualityImprovement) {
+                    setGameState(prev => ({
+                        ...prev,
+                        cash: prev.cash - GAME_CONFIG.QUALITY_IMPROVEMENT_COST,
+                        qualityImprovement: {
+                            weeksLeft: GAME_CONFIG.QUALITY_IMPROVEMENT_WEEKS,
+                            weeklyBonus: GAME_CONFIG.QUALITY_IMPROVEMENT_WEEKLY_BOOST
+                        }
+                    }));
+                }
+            };
+
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('ar-DZ', { 
+                    style: 'currency', 
+                    currency: 'DZD',
+                    minimumFractionDigits: 0 
+                }).format(amount);
+            };
+
+            const saveGame = () => {
+                const saveData = {
+                    companyName,
+                    gameState,
+                    setupComplete,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('ceoSimulatorSave', JSON.stringify(saveData));
+            };
+
+            const loadGame = () => {
+                const savedData = localStorage.getItem('ceoSimulatorSave');
+                if (savedData) {
+                    try {
+                        const parsed = JSON.parse(savedData);
+                        setCompanyName(parsed.companyName);
+                        setGameState(parsed.gameState);
+                        setSetupComplete(parsed.setupComplete || false);
+                        setGameStarted(true);
+                        return true;
+                    } catch (error) {
+                        console.error('Error loading saved game:', error);
+                        return false;
+                    }
+                }
+                return false;
+            };
+
+            useEffect(() => {
+                const savedData = localStorage.getItem('ceoSimulatorSave');
+                if (savedData) {
+                    setHasSavedGame(true);
+                }
+            }, []);
+
+            useEffect(() => {
+                if (gameStarted && companyName && setupComplete) {
+                    saveGame();
+                }
+            }, [gameState, gameStarted, companyName, setupComplete]);
+
+            useEffect(() => {
+                checkLevelUp();
+            }, [gameState.month, gameState.cash, gameState.totalRevenue, gameState.workers]);
+
+            const takeLoan = (loanAmount = 50000) => {
+                if (gameState.loansUsed >= GAME_CONFIG.MAX_LOANS) return;
+                
+                const loanDuration = calculateLoanDuration(loanAmount);
+                const totalDebt = loanAmount * (1 + GAME_CONFIG.LOAN_INTEREST_RATE);
+                const monthlyPayment = Math.ceil(totalDebt / loanDuration);
+                
+                const newLoan = {
+                    amount: loanAmount,
+                    totalDebt: totalDebt,
+                    monthlyPayment: monthlyPayment,
+                    remainingMonths: loanDuration,
+                    missedPayments: 0,
+                    interestRate: GAME_CONFIG.LOAN_INTEREST_RATE,
+                    paidThisMonth: false
+                };
+                
+                setGameState(prev => ({
+                    ...prev,
+                    cash: prev.cash + loanAmount,
+                    loans: [...prev.loans, newLoan],
+                    loansUsed: prev.loansUsed + 1
+                }));
+            };
+
+            const hireWorkers = () => {
+                if (inputs.hireWorkers <= 0) return;
+                if (gameState.workers + inputs.hireWorkers > getMaxWorkers()) {
+                    alert(`الحد الأقصى للعمال في المستوى ${gameState.level} هو ${getMaxWorkers()} عامل`);
+                    return;
+                }
+                
+                const totalCost = inputs.hireWorkers * GAME_CONFIG.RECRUITMENT_COST;
+                if (gameState.cash < totalCost) return;
+                
+                setGameState(prev => ({
+                    ...prev,
+                    workers: prev.workers + inputs.hireWorkers,
+                    capacity: (prev.workers + inputs.hireWorkers) * GAME_CONFIG.PRODUCTION_PER_WORKER,
+                    cash: prev.cash - totalCost
+                }));
+                
+                setInputs(prev => ({...prev, hireWorkers: 0}));
+            };
+
+            const executeDay = () => {
+                setGameState(prev => {
+                    const newState = { ...prev };
+                    
+                    switch (prev.day) {
+                        case 0: // Sunday - Procurement
+                            if (inputs.procurement > 0 && prev.cash >= inputs.procurement * prev.rawUnitCost) {
+                                newState.cash -= inputs.procurement * prev.rawUnitCost;
+                                newState.rawInventory += inputs.procurement;
+                                newState.procurementAmount = inputs.procurement;
+                            }
+                            break;
+                            
+                        case 1: // Monday - Production Planning
+                            newState.plannedProduction = Math.min(inputs.production, prev.capacity, prev.rawInventory);
+                            break;
+                            
+                        case 2: // Tuesday - Production Execution
+                            const actualProduction = newState.plannedProduction;
+                            if (actualProduction > 0) {
+                                newState.rawInventory -= actualProduction;
+                                newState.finishedInventory += actualProduction;
+                                const productionCost = GAME_CONFIG.FIXED_WEEKLY_COST + (actualProduction * prev.variableCost);
+                                newState.cash -= productionCost;
+                            }
+                            break;
+                            
+                        case 3: // Wednesday - Pricing & Marketing
+                            newState.unitPrice = inputs.price;
+                            if (inputs.marketing > 0 && prev.cash >= inputs.marketing) {
+                                newState.cash -= inputs.marketing;
+                                newState.marketingSpend = inputs.marketing;
+                            }
+                            break;
+                            
+                        case 4: // Thursday - Sales
+                            const marketMultiplier = getMarketMultiplier();
+                            let adjustedDemand = Math.round(prev.baseDemand * marketMultiplier);
+                            
+                            // تطبيق تأثيرات الميزات المتقدمة
+                            if (prev.levelFeatures.digitalMarketing) {
+                                adjustedDemand = Math.round(adjustedDemand * 1.3);
+                            }
+                            if (prev.levelFeatures.export) {
+                                adjustedDemand = Math.round(adjustedDemand * 1.5);
+                            }
+                            
+                            const baseDemandFromPrice = Math.round(
+                                adjustedDemand * 
+                                Math.pow(GAME_CONFIG.REFERENCE_PRICE / newState.unitPrice, GAME_CONFIG.PRICE_ELASTICITY)
+                            );
+                            
+                            let marketingEfficiency = GAME_CONFIG.MARKETING_COST_PER_CUSTOMER;
+                            if (prev.levelFeatures.digitalMarketing) {
+                                marketingEfficiency = Math.round(marketingEfficiency * 0.7); // تسويق أكثر كفاءة
+                            }
+                            
+                            const marketingCustomers = Math.floor(newState.marketingSpend / marketingEfficiency);
+                            const demand = baseDemandFromPrice + marketingCustomers;
+                            
+                            const unitsToSell = Math.min(demand, prev.finishedInventory);
+                            let revenue = 0;
+                            let fines = 0;
+                            let notes = '';
+                            
+                            let finalPrice = newState.unitPrice;
+                            if (prev.levelFeatures.premiumProducts) {
+                                finalPrice = Math.round(finalPrice * 1.4); // منتجات متميزة بسعر أعلى
+                            }
+                            
+                            if (gameState.salesChannel === 'legal') {
+                                revenue = unitsToSell * finalPrice;
+                                
+                                // إضافة إيرادات متاجر التجزئة
+                                if (prev.levelFeatures.retailStores > 0) {
+                                    const retailRevenue = prev.levelFeatures.retailStores * 8000;
+                                    revenue += retailRevenue;
+                                    notes = `السوق القانوني: ${unitsToSell} وحدة + ${prev.levelFeatures.retailStores} متجر`;
+                                } else {
+                                    notes = `السوق القانوني: تم بيع ${unitsToSell} وحدة`;
+                                }
+                                
+                                newState.cash += revenue;
+                            } else {
+                                const blackMarketPrice = finalPrice * (1 + GAME_CONFIG.BLACK_MARKET_PREMIUM_MIN + 
+                                    Math.random() * (GAME_CONFIG.BLACK_MARKET_PREMIUM_MAX - GAME_CONFIG.BLACK_MARKET_PREMIUM_MIN));
+                                
+                                const outcome = Math.random();
+                                if (outcome < GAME_CONFIG.BLACK_MARKET_SUCCESS) {
+                                    revenue = unitsToSell * blackMarketPrice;
+                                    newState.cash += revenue;
+                                    notes = `نجح السوق السوداء: ${unitsToSell} وحدة بسعر مميز`;
+                                } else if (outcome < GAME_CONFIG.BLACK_MARKET_SUCCESS + GAME_CONFIG.BLACK_MARKET_FINE) {
+                                    fines = GAME_CONFIG.FINE_AMOUNT * (gameState.level * 0.5); // غرامات أكبر في المستويات العليا
+                                    newState.cash -= fines;
+                                    newState.compliance -= GAME_CONFIG.COMPLIANCE_DROP_FINE;
+                                    notes = `غرامة السوق السوداء: ${formatCurrency(fines)} عقوبة`;
+                                } else {
+                                    notes = `فشل السوق السوداء: لم يتم استلام الدفع`;
+                                }
+                                
+                                newState.compliance = Math.max(0, newState.compliance - GAME_CONFIG.COMPLIANCE_DROP_BLACK_MARKET);
+                            }
+                            
+                            newState.finishedInventory -= unitsToSell;
+                            newState.totalRevenue += revenue;
+                            
+                            // إضافة الدخل السلبي من صندوق الاستثمار
+                            if (prev.levelFeatures.venture) {
+                                const passiveIncome = 50000;
+                                newState.cash += passiveIncome;
+                                revenue += passiveIncome;
+                                notes += ` + دخل سلبي: ${formatCurrency(passiveIncome)}`;
+                            }
+                            
+                            if (unitsToSell < demand) {
+                                newState.customerSatisfaction = Math.max(0, newState.customerSatisfaction - GAME_CONFIG.CSAT_DROP_STOCKOUT);
+                            }
+                            if (newState.unitPrice > GAME_CONFIG.REFERENCE_PRICE * 1.4) {
+                                newState.customerSatisfaction = Math.max(0, newState.customerSatisfaction - GAME_CONFIG.CSAT_DROP_OVERPRICING);
+                            }
+                            if (unitsToSell > 0) {
+                                newState.customerSatisfaction = Math.min(100, newState.customerSatisfaction + GAME_CONFIG.CSAT_RECOVERY);
+                            }
+                            
+                            newState.weekResults.push({
+                                week: prev.week,
+                                unitsSold: unitsToSell,
+                                revenue: revenue,
+                                fines: fines,
+                                notes: notes
+                            });
+                            
+                            break;
+                    }
+                    
+                    return newState;
+                });
+                
+                setInputs({
+                    procurement: 0,
+                    production: 0,
+                    price: gameState.unitPrice,
+                    marketing: 0
+                });
+            };
+
+            const startGame = () => {
+                if (companyName.trim()) {
+                    setGameStarted(true);
+                }
+            };
+
+            const completeSetup = () => {
+                if (setupConfig.loanAmount < GAME_CONFIG.STARTUP_COSTS) {
+                    alert('مبلغ القرض يجب أن يكون على الأقل ' + formatCurrency(GAME_CONFIG.STARTUP_COSTS) + ' لتغطية تكاليف التأسيس');
+                    return;
+                }
+                
+                if (setupConfig.initialWorkers < 1) {
+                    alert('يجب توظيف عامل واحد على الأقل');
+                    return;
+                }
+
+                const loanDuration = calculateLoanDuration(setupConfig.loanAmount);
+                const totalDebt = setupConfig.loanAmount * (1 + GAME_CONFIG.LOAN_INTEREST_RATE);
+                const monthlyPayment = Math.ceil(totalDebt / loanDuration);
+                
+                const initialLoan = {
+                    amount: setupConfig.loanAmount,
+                    totalDebt: totalDebt,
+                    monthlyPayment: monthlyPayment,
+                    remainingMonths: loanDuration,
+                    missedPayments: 0,
+                    interestRate: GAME_CONFIG.LOAN_INTEREST_RATE,
+                    paidThisMonth: false
+                };
+
+                setGameState(prev => ({
+                    ...prev,
+                    cash: setupConfig.loanAmount - GAME_CONFIG.STARTUP_COSTS,
+                    loans: [initialLoan],
+                    loansUsed: 1,
+                    workers: setupConfig.initialWorkers,
+                    capacity: setupConfig.initialWorkers * GAME_CONFIG.PRODUCTION_PER_WORKER
+                }));
+                
+                setSetupComplete(true);
+            };
+
+            const deleteSavedGame = () => {
+                localStorage.removeItem('ceoSimulatorSave');
+                setHasSavedGame(false);
+            };
+
+            const nextDay = () => {
+                setGameState(prev => {
+                    let newState = { ...prev };
+                    
+                    if (prev.day < 4) {
+                        newState.day = prev.day + 1;
+                    } else {
+                        newState.day = 0;
+                        newState.week = prev.week + 1;
+                        newState.currentEvent = null;
+                        
+                        if (newState.qualityImprovement && newState.qualityImprovement.weeksLeft > 0) {
+                            newState.customerSatisfaction = Math.min(100, newState.customerSatisfaction + newState.qualityImprovement.weeklyBonus);
+                            newState.qualityImprovement.weeksLeft -= 1;
+                            
+                            if (newState.qualityImprovement.weeksLeft <= 0) {
+                                newState.qualityImprovement = null;
+                            }
+                        }
+                        
+                        if (newState.customerSatisfaction < 100) {
+                            newState.customerSatisfaction = Math.min(100, newState.customerSatisfaction + GAME_CONFIG.NATURAL_RECOVERY_RATE);
+                        }
+                        
+                        if (newState.compliance < 100 && prev.salesChannel === 'legal') {
+                            newState.compliance = Math.min(100, newState.compliance + 3);
+                        }
+                        
+                        // أحداث عشوائية متدرجة حسب المستوى
+                        if (newState.month >= 2 && Math.random() < 0.4) { // 40% احتمال حدوث حدث كل شهر
+                            const levelEvents = RANDOM_EVENTS[newState.level] || RANDOM_EVENTS[1];
+                            const event = levelEvents[Math.floor(Math.random() * levelEvents.length)];
+                            newState.currentEvent = event;
+                            
+                            if (event.effect.rawUnitCost) {
+                                newState.rawUnitCost = Math.round(prev.rawUnitCost * event.effect.rawUnitCost);
+                            }
+                            if (event.effect.baseDemand) {
+                                newState.baseDemand = Math.round(prev.baseDemand * event.effect.baseDemand);
+                            }
+                            if (event.effect.capacity) {
+                                newState.workers = Math.max(1, Math.round(prev.workers * event.effect.capacity));
+                                newState.capacity = newState.workers * GAME_CONFIG.PRODUCTION_PER_WORKER;
+                            }
+                            if (event.effect.cash) {
+                                newState.cash = Math.max(0, prev.cash + event.effect.cash);
+                            }
+                            if (event.effect.compliance) {
+                                newState.compliance = Math.max(0, Math.min(100, prev.compliance + event.effect.compliance));
+                            }
+                            if (event.effect.csat) {
+                                newState.customerSatisfaction = Math.max(0, Math.min(100, prev.customerSatisfaction + event.effect.csat));
+                            }
+                            if (event.effect.variableCost) {
+                                newState.variableCost = Math.round(prev.variableCost * event.effect.variableCost);
+                            }
+                        }
+                        
+                        if (prev.week >= 4) {
+                            newState.month = prev.month + 1;
+                            newState.week = 1;
+                            
+                            // تحديث حصة السوق بناءً على الأداء الشهري
+                            const monthlyRevenue = gameState.month > 0 ? gameState.totalRevenue / gameState.month : 0;
+                            const marketPerformance = monthlyRevenue / Math.max(1, 50000 * getMarketMultiplier()); // معيار الأداء
+                            
+                            if (marketPerformance > 2) {
+                                newState.marketShare = Math.min(0.8, prev.marketShare + 0.05); // نمو سريع
+                            } else if (marketPerformance > 1.5) {
+                                newState.marketShare = Math.min(0.8, prev.marketShare + 0.03); // نمو متوسط
+                            } else if (marketPerformance > 1) {
+                                newState.marketShare = Math.min(0.8, prev.marketShare + 0.01); // نمو بطيء
+                            } else if (marketPerformance < 0.5) {
+                                newState.marketShare = Math.max(0.05, prev.marketShare - 0.02); // تراجع
+                            }
+                            
+                            newState.salariesPaid = false;
+                            newState.rentPaid = false;
+                            
+                            if (!prev.salariesPaid && prev.workers > 0) {
+                                newState.cash = Math.max(0, newState.cash - GAME_CONFIG.LABOR_VIOLATION_FINE);
+                                newState.compliance = Math.max(0, newState.compliance - 25);
+                                newState.customerSatisfaction = Math.max(0, newState.customerSatisfaction - 15);
+                                newState.workers = 0;
+                                newState.capacity = 0;
+                            }
+                            
+                            newState.loans = prev.loans.map(loan => {
+                                const updatedLoan = { ...loan };
+                                
+                                if (!loan.paidThisMonth) {
+                                    updatedLoan.missedPayments += 1;
+                                    
+                                    const penaltyRate = GAME_CONFIG.LOAN_PENALTY_RATE * updatedLoan.missedPayments;
+                                    updatedLoan.totalDebt = Math.ceil(updatedLoan.totalDebt * (1 + penaltyRate));
+                                    updatedLoan.monthlyPayment = Math.ceil(updatedLoan.totalDebt / Math.max(1, updatedLoan.remainingMonths));
+                                }
+                                
+                                updatedLoan.paidThisMonth = false;
+                                
+                                return updatedLoan;
+                            });
+                            
+                            newState.weekResults = [];
+                            newState.marketingSpend = 0;
+                            
+                            // انتهاء اللعبة بعد 60 شهر أو تحقيق الهيمنة الكاملة
+                            if (newState.month > 60 || (newState.level === 5 && newState.marketShare > 0.7)) {
+                                const totalDebt = newState.loans.reduce((total, loan) => total + loan.totalDebt, 0);
+                                if (totalDebt > 0) {
+                                    if (newState.cash >= totalDebt) {
+                                        newState.cash -= totalDebt;
+                                        newState.loans = [];
+                                        newState.gameEnded = true;
+                                        newState.endReason = 'success_debt_paid';
+                                    } else {
+                                        newState.gameEnded = true;
+                                        newState.endReason = 'bankruptcy';
+                                    }
+                                } else {
+                                    newState.gameEnded = true;
+                                    newState.endReason = newState.level === 5 ? 'empire_complete' : 'success';
+                                }
+                            }
+                        }
+                    }
+                    
+                    return newState;
+                });
+            };
+
+            if (gameState.gameEnded) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
+                        <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-2xl w-full text-center">
+                            {gameState.endReason === 'empire_complete' && (
+                                <div>
+                                    <div className="text-8xl mb-6">👑</div>
+                                    <h1 className="text-5xl font-bold text-yellow-600 mb-4">الإمبراطورية مكتملة!</h1>
+                                    <h2 className="text-3xl font-semibold text-gray-800 mb-6">هيمنت على السوق وبنيت إمبراطورية تجارية!</h2>
+                                    <div className="bg-yellow-50 rounded-2xl p-6 mb-6">
+                                        <p className="text-lg text-yellow-800 mb-4">
+                                            وصلت للمستوى الأعلى وحققت الهيمنة الكاملة على السوق!
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">المستوى النهائي</p>
+                                                <p className="text-yellow-600 font-bold">{getCurrentLevel().name} {getCurrentLevel().icon}</p>
+                                            </div>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">حصة السوق</p>
+                                                <p className="text-yellow-600 font-bold">{(gameState.marketShare * 100).toFixed(1)}%</p>
+                                            </div>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">النقد النهائي</p>
+                                                <p className="text-yellow-600 font-bold ltr">{formatCurrency(gameState.cash)}</p>
+                                            </div>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">قيمة الإمبراطورية</p>
+                                                <p className="text-yellow-600 font-bold ltr">{formatCurrency(calculateEV())}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {gameState.endReason === 'success' && (
+                                <div>
+                                    <div className="text-8xl mb-6">🎉</div>
+                                    <h1 className="text-5xl font-bold text-green-600 mb-4">تهانينا!</h1>
+                                    <h2 className="text-3xl font-semibold text-gray-800 mb-6">نجحت في إدارة شركتك بامتياز!</h2>
+                                    <div className="bg-green-50 rounded-2xl p-6 mb-6">
+                                        <p className="text-lg text-green-800 mb-4">
+                                            أكملت رحلتك كرئيس تنفيذي ووصلت للمستوى {gameState.level}!
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">المستوى المحقق</p>
+                                                <p className="text-green-600 font-bold">{getCurrentLevel().name} {getCurrentLevel().icon}</p>
+                                            </div>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">إجمالي الإيرادات</p>
+                                                <p className="text-green-600 font-bold ltr">{formatCurrency(gameState.totalRevenue)}</p>
+                                            </div>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">النقد النهائي</p>
+                                                <p className="text-green-600 font-bold ltr">{formatCurrency(gameState.cash)}</p>
+                                            </div>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">قيمة المؤسسة</p>
+                                                <p className="text-green-600 font-bold ltr">{formatCurrency(calculateEV())}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {gameState.endReason === 'success_debt_paid' && (
+                                <div>
+                                    <div className="text-8xl mb-6">💰</div>
+                                    <h1 className="text-5xl font-bold text-blue-600 mb-4">مبروك!</h1>
+                                    <h2 className="text-3xl font-semibold text-gray-800 mb-6">سددت جميع الديون بنجاح!</h2>
+                                    <div className="bg-blue-50 rounded-2xl p-6 mb-6">
+                                        <p className="text-lg text-blue-800 mb-4">
+                                            وصلت للمستوى {gameState.level} وسددت جميع الديون!
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">المستوى المحقق</p>
+                                                <p className="text-blue-600 font-bold">{getCurrentLevel().name} {getCurrentLevel().icon}</p>
+                                            </div>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">النقد المتبقي</p>
+                                                <p className="text-blue-600 font-bold ltr">{formatCurrency(gameState.cash)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {gameState.endReason === 'bankruptcy' && (
+                                <div>
+                                    <div className="text-8xl mb-6">⛓️</div>
+                                    <h1 className="text-5xl font-bold text-red-600 mb-4">إفلاس!</h1>
+                                    <h2 className="text-3xl font-semibold text-gray-800 mb-6">تم حجز الشركة</h2>
+                                    <div className="bg-red-50 rounded-2xl p-6 mb-6">
+                                        <p className="text-lg text-red-800 mb-4">
+                                            وصلت للمستوى {gameState.level} لكن لم تتمكن من سداد الديون
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">المستوى المحقق</p>
+                                                <p className="text-red-600 font-bold">{getCurrentLevel().name} {getCurrentLevel().icon}</p>
+                                            </div>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <p className="font-semibold text-gray-800">العجز</p>
+                                                <p className="text-red-600 font-bold ltr">{formatCurrency(calculateTotalDebt() - gameState.cash)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <button
+                                onClick={() => {
+                                    deleteSavedGame();
+                                    window.location.reload();
+                                }}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xl py-4 px-12 rounded-2xl transition-all duration-300 transform hover:scale-105"
+                            >
+                                العب مرة أخرى
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (!gameStarted) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-4xl w-full text-center">
+                            <div className="mb-8">
+                                <h1 className="text-5xl font-bold text-gray-800 mb-4">محاكي الرئيس التنفيذي</h1>
+                                <h2 className="text-3xl font-semibold text-indigo-600 mb-6">رحلة النمو - 5 مستويات</h2>
+                                <p className="text-lg text-gray-600 mb-8">
+                                    ابدأ كشركة ناشئة واصعد عبر 5 مستويات مثيرة لتصل لإمبراطورية تجارية!
+                                    كل مستوى يفتح ميزات جديدة وتحديات أكبر.
+                                </p>
+                            </div>
+
+                            {/* عرض المستويات */}
+                            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                                {Object.entries(LEVELS).map(([level, data]) => (
+                                    <div key={level} className={`${data.cardColor} rounded-2xl p-4 border-2 transition-all duration-300 hover:scale-105`}>
+                                        <div className="text-4xl mb-2">{data.icon}</div>
+                                        <h3 className="font-bold text-sm mb-2">{data.name}</h3>
+                                        <p className="text-xs text-gray-600 mb-2">{data.description}</p>
+                                        <div className="text-xs space-y-1">
+                                            <p className="font-semibold">السوق: ×{data.marketMultiplier}</p>
+                                            <p className="font-semibold">العمال: {data.maxWorkers}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="mb-8">
+                                <label className="block text-xl font-semibold text-gray-700 mb-4">
+                                    ما اسم شركتك؟
+                                </label>
+                                <input
+                                    type="text"
+                                    value={companyName}
+                                    onChange={(e) => setCompanyName(e.target.value)}
+                                    placeholder="أدخل اسم شركتك..."
+                                    className="w-full px-6 py-4 text-lg border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-indigo-500 focus:border-indigo-500 text-center"
+                                    onKeyPress={(e) => e.key === 'Enter' && startGame()}
+                                />
+                            </div>
+                            
+                            <div className="space-y-4">
+                                {hasSavedGame && (
+                                    <div className="bg-green-50 border-2 border-green-300 rounded-2xl p-6 mb-6">
+                                        <div className="flex items-center justify-center mb-3">
+                                            <span className="text-3xl mr-3">💾</span>
+                                            <h3 className="text-xl font-bold text-green-800">لعبة محفوظة موجودة!</h3>
+                                        </div>
+                                        <div className="flex gap-4 justify-center">
+                                            <button
+                                                onClick={loadGame}
+                                                className="bg-green-600 hover:bg-green-700 text-white font-bold text-lg py-3 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105"
+                                            >
+                                                متابعة الرحلة
+                                            </button>
+                                            <button
+                                                onClick={deleteSavedGame}
+                                                className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-3 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105"
+                                            >
+                                                حذف اللعبة
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={startGame}
+                                    disabled={!companyName.trim()}
+                                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold text-xl py-4 px-12 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:scale-100"
+                                >
+                                    🚀 ابدأ رحلة النمو
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (gameStarted && !setupComplete) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-3xl w-full">
+                            <div className="text-center mb-8">
+                                <h1 className="text-4xl font-bold text-gray-800 mb-2">إعداد مشروع {companyName}</h1>
+                                <div className="flex items-center justify-center mb-4">
+                                    <span className="text-4xl mr-3">{getCurrentLevel().icon}</span>
+                                    <div>
+                                        <p className="text-lg font-semibold text-indigo-600">{getCurrentLevel().name}</p>
+                                        <p className="text-sm text-gray-600">{getCurrentLevel().description}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div className="bg-blue-50 rounded-2xl p-6">
+                                    <h2 className="text-2xl font-bold text-blue-800 mb-4">💰 إعداد القرض الأولي</h2>
+                                    
+                                    <div className="mb-6">
+                                        <label className="block text-lg font-semibold text-blue-700 mb-3">
+                                            مبلغ القرض المطلوب
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min={GAME_CONFIG.STARTUP_COSTS}
+                                            step="5000"
+                                            value={setupConfig.loanAmount}
+                                            onChange={(e) => setSetupConfig(prev => ({...prev, loanAmount: parseInt(e.target.value) || GAME_CONFIG.STARTUP_COSTS}))}
+                                            className="w-full px-4 py-3 text-lg border-2 border-blue-300 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 text-center"
+                                        />
+                                    </div>
+
+                                    <div className="bg-white rounded-xl p-4 mb-4">
+                                        <h3 className="font-semibold text-blue-800 mb-3">تفاصيل القرض:</h3>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between">
+                                                <span className="text-blue-700">القسط الشهري:</span>
+                                                <span className="font-bold text-red-600 ltr">{formatCurrency(Math.ceil((setupConfig.loanAmount * (1 + GAME_CONFIG.LOAN_INTEREST_RATE)) / calculateLoanDuration(setupConfig.loanAmount)))}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-green-50 rounded-2xl p-6">
+                                    <h2 className="text-2xl font-bold text-green-800 mb-4">👷 إعداد القوى العاملة</h2>
+                                    
+                                    <div className="mb-6">
+                                        <label className="block text-lg font-semibold text-green-700 mb-3">
+                                            عدد العمال الأولي (الحد الأقصى: {getMaxWorkers()})
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max={getMaxWorkers()}
+                                            value={setupConfig.initialWorkers}
+                                            onChange={(e) => setSetupConfig(prev => ({...prev, initialWorkers: parseInt(e.target.value) || 1}))}
+                                            className="w-full px-4 py-3 text-lg border-2 border-green-300 rounded-xl focus:ring-4 focus:ring-green-500 focus:border-green-500 text-center"
+                                        />
+                                    </div>
+
+                                    <div className="bg-white rounded-xl p-4 mb-4">
+                                        <h3 className="font-semibold text-green-800 mb-3">تفاصيل القوى العاملة:</h3>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between">
+                                                <span className="text-green-700">القدرة الإنتاجية:</span>
+                                                <span className="font-bold text-green-600">{setupConfig.initialWorkers * GAME_CONFIG.PRODUCTION_PER_WORKER} وحدة/أسبوع</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-green-700">الرواتب الشهرية:</span>
+                                                <span className="font-bold text-orange-600 ltr">{formatCurrency(setupConfig.initialWorkers * GAME_CONFIG.WORKER_MONTHLY_SALARY)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 text-center">
+                                <button
+                                    onClick={completeSetup}
+                                    disabled={setupConfig.loanAmount < GAME_CONFIG.STARTUP_COSTS || setupConfig.initialWorkers < 1}
+                                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold text-xl py-4 px-12 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:scale-100"
+                                >
+                                    🚀 ابدأ الرحلة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className={`min-h-screen bg-gradient-to-br ${getCurrentLevel().bgColor} p-4`}>
+                    {/* إشعار الانتقال للمستوى التالي */}
+                    {showLevelUp && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-3xl p-12 text-center level-up-animation shadow-2xl">
+                                <div className="text-8xl mb-4">{getCurrentLevel().icon}</div>
+                                <h1 className="text-4xl font-bold text-purple-600 mb-4">مستوى جديد!</h1>
+                                <h2 className="text-2xl font-semibold text-gray-800 mb-4">{getCurrentLevel().name}</h2>
+                                <p className="text-lg text-gray-600 mb-6">{getCurrentLevel().description}</p>
+                                <div className="bg-purple-50 rounded-2xl p-4">
+                                    <h3 className="font-bold text-purple-800 mb-2">الميزات الجديدة:</h3>
+                                    <ul className="text-sm text-purple-700 space-y-1">
+                                        {getCurrentLevel().unlocks.map((unlock, index) => (
+                                            <li key={index}>✨ {unlock}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-6">
+                            <div className="flex items-center justify-center mb-4">
+                                <div className="level-badge text-white px-6 py-3 rounded-2xl mr-4">
+                                    <span className="text-2xl mr-2">{getCurrentLevel().icon}</span>
+                                    <span className="font-bold">المستوى {gameState.level}: {getCurrentLevel().name}</span>
+                                </div>
+                                <div className="bg-white rounded-2xl px-4 py-2 shadow-lg">
+                                    <p className="text-sm text-gray-600">حصة السوق: {(gameState.marketShare * 100).toFixed(1)}%</p>
+                                </div>
+                            </div>
+                            <h1 className="text-4xl font-bold text-gray-800 mb-2">{companyName}</h1>
+                            <p className="text-lg text-gray-600">الشهر {gameState.month} • الأسبوع {gameState.week} • {DAYS[gameState.day]}</p>
+                            <p className="text-sm text-gray-500 mt-1">{DAY_ACTIVITIES[gameState.day]}</p>
+                        </div>
+
+                        {/* عرض الأحداث والإشعارات */}
+                        <div className="mb-6 space-y-4">
+                            {/* إشعارات مهمة */}
+                            {!gameState.salariesPaid && gameState.workers > 0 && (
+                                <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-4 shadow-lg notification-enter">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <span className="text-2xl mr-2">⚠️</span>
+                                        <h3 className="text-lg font-bold text-red-800">تحذير: رواتب غير مدفوعة!</h3>
+                                    </div>
+                                    <p className="text-sm text-red-700 text-center">
+                                        يجب دفع رواتب العمال ({formatCurrency(gameState.workers * GAME_CONFIG.WORKER_MONTHLY_SALARY)}) قبل نهاية الشهر لتجنب الغرامات
+                                    </p>
+                                </div>
+                            )}
+
+                            {!gameState.rentPaid && (
+                                <div className="bg-orange-50 border-2 border-orange-400 rounded-2xl p-4 shadow-lg notification-enter">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <span className="text-2xl mr-2">🏭</span>
+                                        <h3 className="text-lg font-bold text-orange-800">تذكير: إيجار الورشة</h3>
+                                    </div>
+                                    <p className="text-sm text-orange-700 text-center">
+                                        إيجار الورشة الشهري ({formatCurrency(GAME_CONFIG.WORKSHOP_RENT)}) لم يتم دفعه بعد
+                                    </p>
+                                </div>
+                            )}
+
+                            {gameState.loans.some(loan => !loan.paidThisMonth) && (
+                                <div className="bg-red-50 border-2 border-red-500 rounded-2xl p-4 shadow-lg notification-enter">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <span className="text-2xl mr-2">💳</span>
+                                        <h3 className="text-lg font-bold text-red-800">أقساط قروض متأخرة!</h3>
+                                    </div>
+                                    <p className="text-sm text-red-700 text-center">
+                                        لديك {gameState.loans.filter(loan => !loan.paidThisMonth).length} قسط غير مدفوع
+                                        - إجمالي: {formatCurrency(gameState.loans.filter(loan => !loan.paidThisMonth).reduce((sum, loan) => sum + loan.monthlyPayment, 0))}
+                                    </p>
+                                </div>
+                            )}
+
+                            {gameState.customerSatisfaction < 30 && (
+                                <div className="bg-purple-50 border-2 border-purple-400 rounded-2xl p-4 shadow-lg notification-enter">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <span className="text-2xl mr-2">😞</span>
+                                        <h3 className="text-lg font-bold text-purple-800">رضا العملاء منخفض جداً!</h3>
+                                    </div>
+                                    <p className="text-sm text-purple-700 text-center">
+                                        رضا العملاء {Math.round(gameState.customerSatisfaction)}% - فكر في تعويض العملاء أو تحسين الجودة
+                                    </p>
+                                </div>
+                            )}
+
+                            {gameState.compliance < 30 && (
+                                <div className="bg-gray-50 border-2 border-gray-400 rounded-2xl p-4 shadow-lg notification-enter">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <span className="text-2xl mr-2">⚖️</span>
+                                        <h3 className="text-lg font-bold text-gray-800">مستوى الامتثال منخفض!</h3>
+                                    </div>
+                                    <p className="text-sm text-gray-700 text-center">
+                                        مستوى الامتثال {Math.round(gameState.compliance)}% - تجنب السوق السوداء لتحسين السمعة
+                                    </p>
+                                </div>
+                            )}
+
+                            {gameState.cash < 10000 && calculateTotalDebt() > 0 && (
+                                <div className="bg-red-50 border-2 border-red-600 rounded-2xl p-4 shadow-lg notification-enter animate-pulse">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <span className="text-2xl mr-2">💸</span>
+                                        <h3 className="text-lg font-bold text-red-800">أزمة سيولة!</h3>
+                                    </div>
+                                    <p className="text-sm text-red-700 text-center">
+                                        النقد منخفض جداً ({formatCurrency(gameState.cash)}) مع ديون قائمة - خطر الإفلاس!
+                                    </p>
+                                </div>
+                            )}
+
+                            {gameState.currentEvent && (
+                                <div className="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-6 shadow-lg market-expansion">
+                                    <div className="flex items-center justify-center mb-3">
+                                        <span className="text-3xl mr-3">🎲</span>
+                                        <h3 className="text-xl font-bold text-yellow-800">حدث المستوى {gameState.level}</h3>
+                                    </div>
+                                    <p className="text-lg font-semibold text-yellow-700 text-center mb-2">{gameState.currentEvent.name}</p>
+                                    <p className="text-sm text-yellow-600 text-center">{gameState.currentEvent.description}</p>
+                                </div>
+                            )}
+
+                            {/* عرض التحديات الحالية */}
+                            <div className={`${getCurrentLevel().cardColor} border-2 rounded-2xl p-6 shadow-lg`}>
+                                <h3 className="text-xl font-bold text-gray-800 text-center mb-4">تحديات {getCurrentLevel().name}</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {getCurrentLevel().challenges.map((challenge, index) => (
+                                        <div key={index} className="bg-white rounded-lg p-3 text-center">
+                                            <p className="text-sm font-semibold text-gray-700">{challenge}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* الإحصائيات الرئيسية */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
+                            <div className="card-gradient rounded-2xl p-4 shadow-lg card-hover">
+                                <div className="flex items-center mb-2">
+                                    <span className="text-2xl mr-2">💰</span>
+                                    <h3 className="text-sm font-semibold text-gray-700">النقد</h3>
+                                </div>
+                                <p className="text-lg font-bold text-green-600 ltr text-shadow">{formatCurrency(gameState.cash)}</p>
+                            </div>
+                            <div className="card-gradient rounded-2xl p-4 shadow-lg card-hover">
+                                <div className="flex items-center mb-2">
+                                    <span className="text-2xl mr-2">📈</span>
+                                    <h3 className="text-sm font-semibold text-gray-700">إجمالي الإيرادات</h3>
+                                </div>
+                                <p className="text-lg font-bold text-blue-600 ltr text-shadow">{formatCurrency(gameState.totalRevenue)}</p>
+                            </div>
+                            <div className="card-gradient rounded-2xl p-4 shadow-lg card-hover">
+                                <div className="flex items-center mb-2">
+                                    <span className="text-2xl mr-2">👷</span>
+                                    <h3 className="text-sm font-semibold text-gray-700">العمال</h3>
+                                </div>
+                                <p className="text-lg font-bold text-orange-600 text-shadow">{gameState.workers}/{getMaxWorkers()}</p>
+                            </div>
+                            <div className="card-gradient rounded-2xl p-4 shadow-lg card-hover">
+                                <div className="flex items-center mb-2">
+                                    <span className="text-2xl mr-2">🏪</span>
+                                    <h3 className="text-sm font-semibold text-gray-700">السوق</h3>
+                                </div>
+                                <p className="text-lg font-bold text-purple-600 text-shadow">×{getMarketMultiplier()}</p>
+                            </div>
+                            <div className="card-gradient rounded-2xl p-4 shadow-lg card-hover">
+                                <div className="flex items-center mb-2">
+                                    <span className="text-2xl mr-2">📦</span>
+                                    <h3 className="text-sm font-semibold text-gray-700">المواد الخام</h3>
+                                </div>
+                                <p className="text-lg font-bold text-blue-600 text-shadow">{gameState.rawInventory}</p>
+                            </div>
+                            <div className="card-gradient rounded-2xl p-4 shadow-lg card-hover">
+                                <div className="flex items-center mb-2">
+                                    <span className="text-2xl mr-2">📋</span>
+                                    <h3 className="text-sm font-semibold text-gray-700">البضائع</h3>
+                                </div>
+                                <p className="text-lg font-bold text-purple-600 text-shadow">{gameState.finishedInventory}</p>
+                            </div>
+                            <div className="card-gradient rounded-2xl p-4 shadow-lg card-hover">
+                                <div className="flex items-center mb-2">
+                                    <span className="text-2xl mr-2">😊</span>
+                                    <h3 className="text-sm font-semibold text-gray-700">رضا العملاء</h3>
+                                </div>
+                                <p className="text-lg font-bold text-pink-600 text-shadow">{Math.round(gameState.customerSatisfaction)}%</p>
+                            </div>
+                            <div className="card-gradient rounded-2xl p-4 shadow-lg card-hover">
+                                <div className="flex items-center mb-2">
+                                    <span className="text-2xl mr-2">🏢</span>
+                                    <h3 className="text-sm font-semibold text-gray-700">قيمة المؤسسة</h3>
+                                </div>
+                                <p className="text-lg font-bold text-indigo-600 ltr text-shadow">{formatCurrency(calculateEV())}</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* لوحة التحكم الرئيسية */}
+                            <div className="bg-white rounded-2xl p-6 shadow-lg">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">🎮 لوحة التحكم</h2>
+                                
+                                {gameState.day === 0 && (
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            المواد الخام للشراء (التكلفة: {formatCurrency(gameState.rawUnitCost)}/وحدة)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={inputs.procurement}
+                                            onChange={(e) => setInputs(prev => ({...prev, procurement: parseInt(e.target.value) || 0}))}
+                                            className="w-full px-4 py-3 input-enhanced rounded-xl focus:ring-2 focus:ring-blue-500 text-center font-semibold text-lg"
+                                            placeholder="0"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            التكلفة الإجمالية: {formatCurrency(inputs.procurement * gameState.rawUnitCost)}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {gameState.day === 1 && (
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            الوحدات المراد إنتاجها (السعة: {gameState.capacity}، المتاح: {gameState.rawInventory})
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max={Math.min(gameState.capacity, gameState.rawInventory)}
+                                            value={inputs.production}
+                                            onChange={(e) => setInputs(prev => ({...prev, production: parseInt(e.target.value) || 0}))}
+                                            className="w-full px-4 py-3 input-enhanced rounded-xl focus:ring-2 focus:ring-blue-500 text-center font-semibold text-lg"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                )}
+
+                                {gameState.day === 3 && (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                سعر الوحدة (المرجع: {formatCurrency(GAME_CONFIG.REFERENCE_PRICE)})
+                                                {gameState.levelFeatures.premiumProducts && (
+                                                    <span className="text-green-600 font-bold"> +40% منتجات متميزة</span>
+                                                )}
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={inputs.price}
+                                                onChange={(e) => setInputs(prev => ({...prev, price: parseInt(e.target.value) || 1}))}
+                                                className="w-full px-4 py-3 input-enhanced rounded-xl focus:ring-2 focus:ring-blue-500 text-center font-semibold text-lg"
+                                                placeholder="85"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                إنفاق التسويق 
+                                                {gameState.levelFeatures.digitalMarketing ? 
+                                                    " (6 دج = عميل واحد - تسويق رقمي)" : 
+                                                    " (8 دج = عميل واحد)"
+                                                }
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={inputs.marketing}
+                                                onChange={(e) => setInputs(prev => ({...prev, marketing: parseInt(e.target.value) || 0}))}
+                                                className="w-full px-4 py-3 input-enhanced rounded-xl focus:ring-2 focus:ring-blue-500 text-center font-semibold text-lg"
+                                                placeholder="0"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                عملاء إضافيون: {Math.floor(inputs.marketing / (gameState.levelFeatures.digitalMarketing ? 6 : 8))} عميل
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {gameState.day === 4 && (
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">قناة المبيعات</label>
+                                        <div className="space-y-3">
+                                            <button
+                                                onClick={() => setGameState(prev => ({...prev, salesChannel: 'legal'}))}
+                                                className={`w-full px-4 py-3 rounded-xl font-semibold transition-all duration-300 hover-scale shadow-md ${
+                                                    gameState.salesChannel === 'legal' 
+                                                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg' 
+                                                        : 'bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 hover:from-gray-300 hover:to-gray-400'
+                                                }`}
+                                            >
+                                                ✅ السوق القانوني (آمن، محدود)
+                                                {gameState.levelFeatures.retailStores > 0 && (
+                                                    <div className="text-xs mt-1">
+                                                        + {gameState.levelFeatures.retailStores} متجر تجزئة
+                                                    </div>
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={() => setGameState(prev => ({...prev, salesChannel: 'black'}))}
+                                                className={`w-full px-4 py-3 rounded-xl font-semibold transition-all duration-300 hover-scale shadow-md ${
+                                                    gameState.salesChannel === 'black' 
+                                                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg animate-pulse-custom' 
+                                                        : 'bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 hover:from-gray-300 hover:to-gray-400'
+                                                }`}
+                                            >
+                                                ⚠️ السوق السوداء (محفوف بالمخاطر، مميز)
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="space-y-3 mt-6">
+                                    <button
+                                        onClick={executeDay}
+                                        className="w-full btn-primary text-white font-bold py-4 px-6 rounded-xl hover-scale animate-wiggle text-lg shadow-lg"
+                                    >
+                                        ⚡ تنفيذ {DAY_ACTIVITIES[gameState.day]}
+                                    </button>
+                                    
+                                    <button
+                                        onClick={nextDay}
+                                        className="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover-scale shadow-lg"
+                                    >
+                                        ⏭️ اليوم التالي
+                                    </button>
+                                    
+                                    <div className="space-y-3 bg-purple-50 rounded-xl p-4 border-2 border-purple-200">
+                                        <div className="text-center">
+                                            <span className="text-2xl">💰</span>
+                                            <p className="text-sm font-semibold text-purple-800 mt-1">
+                                                أخذ قرض ({gameState.loansUsed}/{GAME_CONFIG.MAX_LOANS})
+                                            </p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                onClick={() => takeLoan(50000)}
+                                                disabled={gameState.loansUsed >= GAME_CONFIG.MAX_LOANS}
+                                                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-2 px-2 text-sm rounded-lg transition-all duration-300 hover-scale shadow-md"
+                                            >
+                                                50K
+                                            </button>
+                                            <button
+                                                onClick={() => takeLoan(100000)}
+                                                disabled={gameState.loansUsed >= GAME_CONFIG.MAX_LOANS}
+                                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-2 px-2 text-sm rounded-lg transition-all duration-300 hover-scale shadow-md"
+                                            >
+                                                100K
+                                            </button>
+                                            <button
+                                                onClick={() => takeLoan(250000)}
+                                                disabled={gameState.loansUsed >= GAME_CONFIG.MAX_LOANS}
+                                                className="bg-gradient-to-r from-purple-800 to-purple-900 hover:from-purple-900 hover:to-black disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-2 px-2 text-sm rounded-lg transition-all duration-300 hover-scale shadow-md"
+                                            >
+                                                250K
+                                            </button>
+                                            <button
+                                                onClick={() => takeLoan(500000)}
+                                                disabled={gameState.loansUsed >= GAME_CONFIG.MAX_LOANS}
+                                                className="bg-gradient-to-r from-purple-900 to-black hover:from-black hover:to-purple-900 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-2 px-2 text-sm rounded-lg transition-all duration-300 hover-scale shadow-md"
+                                            >
+                                                500K
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* إدارة العمال */}
+                                <div className="mt-6 p-4 bg-orange-50 rounded-lg">
+                                    <h3 className="font-semibold text-orange-800 mb-3">إدارة العمال</h3>
+                                    <div className="space-y-2">
+                                        <p className="text-sm text-orange-700">
+                                            العمال: {gameState.workers}/{getMaxWorkers()} • القدرة: {gameState.capacity} وحدة/أسبوع
+                                        </p>
+                                        
+                                        <div className="flex gap-2 mt-3">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max={getMaxWorkers() - gameState.workers}
+                                                value={inputs.hireWorkers}
+                                                onChange={(e) => setInputs(prev => ({...prev, hireWorkers: parseInt(e.target.value) || 0}))}
+                                                placeholder="عدد العمال"
+                                                className="flex-1 px-2 py-1 text-sm border border-orange-300 rounded focus:ring-2 focus:ring-orange-500"
+                                            />
+                                            <button
+                                                onClick={hireWorkers}
+                                                disabled={inputs.hireWorkers <= 0 || gameState.cash < inputs.hireWorkers * GAME_CONFIG.RECRUITMENT_COST || gameState.workers >= getMaxWorkers()}
+                                                className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-bold py-1 px-3 text-sm rounded transition-colors"
+                                            >
+                                                توظيف
+                                            </button>
+                                        </div>
+                                        <p className="text-xs text-orange-600">
+                                            تكلفة التوظيف: {formatCurrency(GAME_CONFIG.RECRUITMENT_COST)}/عامل
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* ميزات المستوى */}
+                            <div className="bg-white rounded-2xl p-6 shadow-lg">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">🚀 ميزات المستوى {gameState.level}</h2>
+                                
+                                {LEVEL_FEATURES[gameState.level] && (
+                                    <div className="space-y-4">
+                                        {Object.entries(LEVEL_FEATURES[gameState.level]).map(([key, feature]) => (
+                                            <div key={key} className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-200">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <h3 className="font-bold text-indigo-800">{feature.name}</h3>
+                                                        <p className="text-sm text-indigo-600">{feature.description}</p>
+                                                        <p className="text-sm font-semibold text-indigo-700">
+                                                            التكلفة: {formatCurrency(feature.cost)}
+                                                        </p>
+                                                        {key === 'retailStores' && gameState.levelFeatures.retailStores > 0 && (
+                                                            <p className="text-sm text-green-600 font-semibold">
+                                                                ✅ لديك {gameState.levelFeatures.retailStores} متجر
+                                                            </p>
+                                                        )}
+                                                        {key !== 'retailStores' && gameState.levelFeatures[key] && (
+                                                            <p className="text-sm text-green-600 font-semibold">✅ مفعل</p>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => buyLevelFeature(key)}
+                                                        disabled={gameState.cash < feature.cost || (key !== 'retailStores' && gameState.levelFeatures[key])}
+                                                        className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 text-sm rounded-lg transition-colors"
+                                                    >
+                                                        {key === 'retailStores' ? 'شراء متجر' : 'شراء'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {!LEVEL_FEATURES[gameState.level] && (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500">لا توجد ميزات خاصة متاحة في هذا المستوى</p>
+                                        <p className="text-sm text-gray-400 mt-2">ركز على النمو للوصول للمستوى التالي!</p>
+                                    </div>
+                                )}
+
+                                {/* شروط الانتقال للمستوى التالي */}
+                                {gameState.level < 5 && (
+                                    <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-300">
+                                        <h3 className="font-bold text-yellow-800 mb-2">🎯 شروط المستوى التالي:</h3>
+                                        <div className="text-sm text-yellow-700 space-y-1">
+                                            {gameState.level === 1 && (
+                                                <>
+                                                    <p>• الوصول للشهر 12 ✓</p>
+                                                    <p>• امتلاك {formatCurrency(100000)} نقداً {gameState.cash >= 100000 ? '✅' : '❌'}</p>
+                                                </>
+                                            )}
+                                            {gameState.level === 2 && (
+                                                <>
+                                                    <p>• الوصول للشهر 24 {gameState.month >= 24 ? '✅' : '❌'}</p>
+                                                    <p>• تحقيق {formatCurrency(500000)} إيرادات إجمالية {gameState.totalRevenue >= 500000 ? '✅' : '❌'}</p>
+                                                </>
+                                            )}
+                                            {gameState.level === 3 && (
+                                                <>
+                                                    <p>• الوصول للشهر 36 {gameState.month >= 36 ? '✅' : '❌'}</p>
+                                                    <p>• توظيف 50 عامل على الأقل {gameState.workers >= 50 ? '✅' : '❌'}</p>
+                                                </>
+                                            )}
+                                            {gameState.level === 4 && (
+                                                <>
+                                                    <p>• الوصول للشهر 48 {gameState.month >= 48 ? '✅' : '❌'}</p>
+                                                    <p>• قيمة مؤسسة {formatCurrency(2000000)} {calculateEV() >= 2000000 ? '✅' : '❌'}</p>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* الملخص والإحصائيات */}
+                            <div className="bg-white rounded-2xl p-6 shadow-lg">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 الملخص الشهري</h2>
+                                
+                                <div className="space-y-3">
+                                    <div className="bg-blue-50 rounded-lg p-3">
+                                        <h3 className="font-semibold text-blue-800">الصحة المالية</h3>
+                                        <p className="text-sm text-blue-700">النقد: {formatCurrency(gameState.cash)}</p>
+                                        <p className="text-sm text-blue-700">إجمالي الإيرادات: {formatCurrency(gameState.totalRevenue)}</p>
+                                        <p className="text-sm text-blue-700">الإيرادات الشهرية: {formatCurrency(gameState.month > 0 ? gameState.totalRevenue / gameState.month : 0)}</p>
+                                        <p className="text-sm text-blue-700">إجمالي الديون: {formatCurrency(calculateTotalDebt())}</p>
+                                        <p className="text-sm text-blue-700">الأقساط الشهرية: {formatCurrency(calculateMonthlyPayments())}</p>
+                                        <p className="text-sm text-blue-700 font-bold">قيمة المؤسسة: {formatCurrency(calculateEV())}</p>
+                                    </div>
+                                    
+                                    <div className="bg-green-50 rounded-lg p-3">
+                                        <h3 className="font-semibold text-green-800">العمليات</h3>
+                                        <p className="text-sm text-green-700">العمال: {gameState.workers}/{getMaxWorkers()}</p>
+                                        <p className="text-sm text-green-700">القدرة الإنتاجية: {gameState.capacity} وحدة/أسبوع</p>
+                                        <p className="text-sm text-green-700">حجم السوق: ×{getMarketMultiplier()}</p>
+                                        <p className="text-sm text-green-700">حصة السوق: {(gameState.marketShare * 100).toFixed(1)}%</p>
+                                        <p className="text-sm text-green-700">الامتثال: {Math.round(gameState.compliance)}%</p>
+                                    </div>
+
+                                    <div className="bg-orange-50 rounded-lg p-3">
+                                        <h3 className="font-semibold text-orange-800">💰 التكاليف الشهرية</h3>
+                                        <p className="text-sm text-orange-700">رواتب العمال: {formatCurrency(gameState.workers * GAME_CONFIG.WORKER_MONTHLY_SALARY)}</p>
+                                        <p className="text-sm text-orange-700">إيجار الورشة: {formatCurrency(GAME_CONFIG.WORKSHOP_RENT)}</p>
+                                        <p className="text-sm text-orange-700">أقساط القروض: {formatCurrency(calculateMonthlyPayments())}</p>
+                                        <p className="text-sm text-orange-700 font-bold">إجمالي التكاليف: {formatCurrency(gameState.workers * GAME_CONFIG.WORKER_MONTHLY_SALARY + GAME_CONFIG.WORKSHOP_RENT + calculateMonthlyPayments())}</p>
+                                    </div>
+
+                                    <div className="bg-cyan-50 rounded-lg p-3">
+                                        <h3 className="font-semibold text-cyan-800">📦 تكاليف الإنتاج</h3>
+                                        <p className="text-sm text-cyan-700">المواد الخام: {formatCurrency(gameState.rawUnitCost)}/وحدة</p>
+                                        <p className="text-sm text-cyan-700">التكلفة المتغيرة: {formatCurrency(gameState.variableCost)}/وحدة</p>
+                                        <p className="text-sm text-cyan-700">التكلفة الثابتة الأسبوعية: {formatCurrency(GAME_CONFIG.FIXED_WEEKLY_COST)}</p>
+                                        <p className="text-sm text-cyan-700">الطلب الأساسي: {Math.round(gameState.baseDemand * getMarketMultiplier())} وحدة/أسبوع</p>
+                                    </div>
+                                    
+                                    <div className="bg-purple-50 rounded-lg p-3">
+                                        <h3 className="font-semibold text-purple-800">الميزات المفعلة</h3>
+                                        {gameState.levelFeatures.retailStores > 0 && (
+                                            <p className="text-sm text-purple-700">🏪 متاجر التجزئة: {gameState.levelFeatures.retailStores}</p>
+                                        )}
+                                        {gameState.levelFeatures.digitalMarketing && (
+                                            <p className="text-sm text-purple-700">📱 التسويق الرقمي</p>
+                                        )}
+                                        {gameState.levelFeatures.export && (
+                                            <p className="text-sm text-purple-700">🌍 التصدير</p>
+                                        )}
+                                        {gameState.levelFeatures.premiumProducts && (
+                                            <p className="text-sm text-purple-700">⭐ منتجات متميزة</p>
+                                        )}
+                                        {gameState.levelFeatures.venture && (
+                                            <p className="text-sm text-purple-700">💎 صندوق الاستثمار</p>
+                                        )}
+                                        {Object.values(gameState.levelFeatures).every(feature => 
+                                            (typeof feature === 'boolean' && !feature) || 
+                                            (typeof feature === 'number' && feature === 0)
+                                        ) && (
+                                            <p className="text-sm text-gray-500 italic">لا توجد ميزات مفعلة</p>
+                                        )}
+                                    </div>
+
+                                    <div className="bg-indigo-50 rounded-lg p-3">
+                                        <h3 className="font-semibold text-indigo-800">📊 تفاصيل تقييم المؤسسة</h3>
+                                        <div className="text-xs text-indigo-700 space-y-1">
+                                            <p>• الربح الشهري المقدر: {formatCurrency(Math.max(0, (gameState.month > 0 ? gameState.totalRevenue / gameState.month : 0) - ((gameState.workers * GAME_CONFIG.WORKER_MONTHLY_SALARY) + GAME_CONFIG.WORKSHOP_RENT + calculateMonthlyPayments())))}</p>
+                                            <p>• مضاعف التقييم: {(8 + (gameState.level - 1) * 2).toFixed(1)}x (المستوى {gameState.level})</p>
+                                            <p>• تأثير رضا العملاء: {((gameState.customerSatisfaction / 100) * 100).toFixed(0)}%</p>
+                                            <p>• تأثير السمعة: {((gameState.compliance / 100) * 100).toFixed(0)}%</p>
+                                            <p>• مكافأة حصة السوق: +{(gameState.marketShare * 200).toFixed(0)}%</p>
+                                            <p>• قيمة الأصول: {formatCurrency(gameState.workers * 5000 + gameState.rawInventory * gameState.rawUnitCost + gameState.finishedInventory * gameState.unitPrice * 0.8)}</p>
+                                            <p>• نسبة الديون للدخل: {(calculateTotalDebt() / Math.max(1, gameState.cash + (gameState.month > 0 ? gameState.totalRevenue / gameState.month : 0))).toFixed(2)}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* المدفوعات الشهرية */}
+                                    <div className="bg-yellow-50 rounded-lg p-3">
+                                        <h3 className="font-semibold text-yellow-800">💳 المدفوعات الشهرية</h3>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-yellow-700">
+                                                    رواتب العمال ({formatCurrency(gameState.workers * GAME_CONFIG.WORKER_MONTHLY_SALARY)}) {gameState.salariesPaid ? '✅' : '❌'}
+                                                </span>
+                                                <button
+                                                    onClick={paySalaries}
+                                                    disabled={gameState.salariesPaid || gameState.cash < gameState.workers * GAME_CONFIG.WORKER_MONTHLY_SALARY || gameState.workers === 0}
+                                                    className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white font-bold py-1 px-2 text-xs rounded"
+                                                >
+                                                    دفع
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-yellow-700">
+                                                    إيجار الورشة ({formatCurrency(GAME_CONFIG.WORKSHOP_RENT)}) {gameState.rentPaid ? '✅' : '❌'}
+                                                </span>
+                                                <button
+                                                    onClick={payRent}
+                                                    disabled={gameState.rentPaid || gameState.cash < GAME_CONFIG.WORKSHOP_RENT}
+                                                    className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white font-bold py-1 px-2 text-xs rounded"
+                                                >
+                                                    دفع
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* أقساط القروض */}
+                                    {gameState.loans.length > 0 && (
+                                        <div className="bg-red-50 rounded-lg p-3">
+                                            <h3 className="font-semibold text-red-800">💳 أقساط القروض</h3>
+                                            <div className="space-y-2">
+                                                {gameState.loans.map((loan, index) => (
+                                                    <div key={index} className="bg-white rounded p-2">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="text-xs text-red-700 font-semibold">
+                                                                قرض #{index + 1} {loan.paidThisMonth ? '✅' : '❌'}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => payLoanInstallment(index)}
+                                                                disabled={loan.paidThisMonth || gameState.cash < loan.monthlyPayment}
+                                                                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-1 px-2 text-xs rounded"
+                                                            >
+                                                                سداد
+                                                            </button>
+                                                        </div>
+                                                        <div className="text-xs text-red-600 space-y-1">
+                                                            <p>القسط الشهري: {formatCurrency(loan.monthlyPayment)}</p>
+                                                            <p>المبلغ المتبقي: {formatCurrency(loan.totalDebt)}</p>
+                                                            <p>الأشهر المتبقية: {loan.remainingMonths}</p>
+                                                            {loan.missedPayments > 0 && (
+                                                                <p className="text-red-800 font-bold">أقساط متأخرة: {loan.missedPayments}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* إجراءات إضافية */}
+                                    <div className="bg-pink-50 rounded-lg p-3">
+                                        <h3 className="font-semibold text-pink-800">🛠️ إجراءات إضافية</h3>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-pink-700">
+                                                    تعويض العملاء (+15% رضا)
+                                                </span>
+                                                <button
+                                                    onClick={compensateCustomers}
+                                                    disabled={gameState.cash < GAME_CONFIG.CUSTOMER_COMPENSATION_COST}
+                                                    className="bg-pink-600 hover:bg-pink-700 disabled:bg-gray-400 text-white font-bold py-1 px-2 text-xs rounded"
+                                                >
+                                                    {formatCurrency(GAME_CONFIG.CUSTOMER_COMPENSATION_COST)}
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-pink-700">
+                                                    تحسين الجودة (4 أسابيع)
+                                                </span>
+                                                <button
+                                                    onClick={investInQuality}
+                                                    disabled={gameState.cash < GAME_CONFIG.QUALITY_IMPROVEMENT_COST || gameState.qualityImprovement}
+                                                    className="bg-pink-600 hover:bg-pink-700 disabled:bg-gray-400 text-white font-bold py-1 px-2 text-xs rounded"
+                                                >
+                                                    {formatCurrency(GAME_CONFIG.QUALITY_IMPROVEMENT_COST)}
+                                                </button>
+                                            </div>
+                                            
+                                            {gameState.qualityImprovement && (
+                                                <div className="bg-green-100 rounded p-2">
+                                                    <p className="text-xs text-green-800">
+                                                        🔧 تحسين الجودة نشط: {gameState.qualityImprovement.weeksLeft} أسابيع متبقية
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* نتائج الأسابيع الأخيرة */}
+                                {gameState.weekResults.length > 0 && (
+                                    <div className="mt-4">
+                                        <h3 className="font-semibold text-gray-800 mb-2">📈 نتائج الأسابيع الأخيرة</h3>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                                            {gameState.weekResults.slice(-4).map((result, index) => (
+                                                <div key={index} className="bg-gray-50 rounded-lg p-2 text-xs">
+                                                    <p className="font-semibold">الأسبوع {result.week}: {result.unitsSold} وحدة - {formatCurrency(result.revenue)}</p>
+                                                    {result.fines > 0 && (
+                                                        <p className="text-red-600 font-semibold">غرامة: {formatCurrency(result.fines)}</p>
+                                                    )}
+                                                    <p className="text-gray-600 italic">{result.notes}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<CEOSimulation />, document.getElementById('root'));
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f27b74c6e92822',t:'MTc2MzI0ODg1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
